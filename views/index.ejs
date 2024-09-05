@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>$SNAP token valuation</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .snapchat-logo {
+      max-width: 100px;
+      margin: 0 auto;
+    }
+    /* Loader styles */
+    .loader {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #FFDD00;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-r from-[#FFDD00] to-[#FFC107] min-h-screen flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-lg p-8 w-full max-w-md">
+    <!-- Snapchat Logo -->
+    <div class="flex justify-center mb-4">
+      <img src="/snap.png" alt="Snapchat Logo" class="snapchat-logo">
+    </div>
+
+    <h1 class="text-3xl font-bold text-center mb-6 text-[#333]">Snapchat Token Valuation</h1>
+    <p class="text-center text-[#666] mb-6">
+      This is for informational purposes only and is not affiliated with Snapchat.
+    </p>
+
+    <!-- Form -->
+    <form id="snapForm" class="space-y-4">
+      <div>
+        <label for="username" class="block font-medium mb-1 text-[#666]">Snapchat Username</label>
+        <input
+          name="username"
+          class="flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm"
+          id="username"
+          placeholder="Enter your Snapchat username"
+          required
+        />
+      </div>
+      <div>
+        <label for="score" class="block font-medium mb-1 text-[#666]">Snapscores</label>
+        <input
+          name="score"
+          class="flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm"
+          id="score"
+          placeholder="Enter your Snapscores"
+          type="number"
+          required
+        />
+      </div>
+      <button id="submitButton" type="submit" class="inline-flex items-center justify-center rounded-md text-sm h-10 px-4 py-2 w-full bg-[#FFDD00] text-white font-medium hover:bg-[#FFC107]">
+        Calculate Value
+      </button>
+      <div id="loader" class="loader hidden"></div>
+    </form>
+
+    <!-- Display Results -->
+    <div id="results" class="mt-6 bg-gradient-to-r from-[#FFDD00] to-[#FFC107] rounded-lg p-4 text-center hidden">
+      <h2 class="text-2xl font-bold text-[#333]">Your Snapchat Account Value</h2>
+      <p id="value" class="text-4xl font-bold text-[#333] mt-2">$0.00</p>
+      <p id="snapAllocation" class="text-xl font-bold text-[#333] mt-4">$SNAP Allocation: 0 tokens</p>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('snapForm').addEventListener('submit', async function (e) {
+      e.preventDefault(); // Prevent form from refreshing the page
+  
+      const username = document.getElementById('username').value;
+      const score = document.getElementById('score').value;
+  
+      // Show loader and disable button
+      document.getElementById('submitButton').disabled = true;
+      document.getElementById('loader').classList.remove('hidden');
+      document.getElementById('submitButton').textContent = 'Calculating...';
+  
+      try {
+        const response = await fetch('/calculate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ username, score }),
+        });
+  
+        const data = await response.json();
+  
+        // Delay the display of results by 3 seconds (3000 ms)
+        setTimeout(() => {
+          // Hide loader and enable button after 3 seconds
+          document.getElementById('submitButton').disabled = false;
+          document.getElementById('loader').classList.add('hidden');
+          document.getElementById('submitButton').textContent = 'Calculate Value';
+  
+          // Display results
+          document.getElementById('results').classList.remove('hidden');
+          document.getElementById('value').textContent = `$${data.value}`;
+          document.getElementById('snapAllocation').textContent = `$SNAP Allocation: ${data.snapAllocation} tokens`;
+        }, 3000); // 3-second delay
+  
+      } catch (error) {
+        console.error('Error calculating value:', error);
+  
+        // Hide loader and enable button in case of error
+        document.getElementById('submitButton').disabled = false;
+        document.getElementById('loader').classList.add('hidden');
+        document.getElementById('submitButton').textContent = 'Calculate Value';
+      }
+    });
+  </script>
+  
+</body>
+</html>
